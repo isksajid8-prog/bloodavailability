@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BloodConnect – Blood Donation System | Donate Blood, Save Lives</title>
+  <meta name="description" content="BloodConnect is a fast, responsive emergency blood donation system connecting donors with patients in urgent need. Built for college hackathon demonstration.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩸</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Prototype Notice Banner -->
+  <div class="prototype-banner">
+    <div class="container" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; width: 100%; gap: 10px;">
+      <div class="banner-left">
+        <span class="banner-pill">Hackathon Prototype</span>
+        <span>Includes pre-loaded sample donors & requests for immediate demonstration. Data persists locally via LocalStorage.</span>
+      </div>
+      <div class="banner-actions">
+        <button class="banner-btn" onclick="addQuickDemoRequest()" title="Simulate an emergency request">⚡ Add Demo Request</button>
+        <button class="banner-btn" onclick="resetDemoData()" title="Reset data to initial clean sample dataset">🔄 Reset Sample Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header & Navigation -->
+  <header class="header">
+    <div class="container nav-container">
+      <a href="#home" class="brand" onclick="scrollToSection('home'); return false;">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+          </svg>
+        </div>
+        <span>Blood<span class="accent">Connect</span></span>
+      </a>
+
+      <nav>
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="#home" class="nav-link active" onclick="scrollToSection('home'); return false;">Home</a></li>
+          <li><a href="#find-donor" class="nav-link" onclick="scrollToSection('find-donor'); return false;">Find Donor</a></li>
+          <li><a href="#register" class="nav-link" onclick="scrollToSection('register'); return false;">Become a Donor</a></li>
+          <li><a href="#compatibility" class="nav-link" onclick="scrollToSection('compatibility'); return false;">Compatibility</a></li>
+          <li><a href="#dashboard" class="nav-link" onclick="scrollToSection('dashboard'); return false;">Live Dashboard</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn-emergency-nav" onclick="scrollToSection('request-blood')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Need Blood Urgently</span>
+        </button>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation menu">
+          ☰
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Live Emergency Ticker -->
+  <div class="emergency-ticker">
+    <div class="ticker-label">
+      <span style="display:inline-block; width:8px; height:8px; background:#fff; border-radius:50%; animation:heart-beat 1s infinite;"></span>
+      Live Alerts
+    </div>
+    <div class="ticker-marquee">
+      <div class="ticker-content" id="tickerContent">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Section 1: Hero Section (Home) -->
+    <section class="hero-section" id="home">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span class="pulse-dot"></span>
+            Real-Time Blood Donor Network
+          </div>
+          <h1 class="hero-title">
+            Blood<span class="text-gradient">Connect</span>
+          </h1>
+          <span class="hero-tagline">Donate Blood, Save Lives.</span>
+          <p class="hero-subtitle">
+            Connecting generous volunteer blood donors with patients and critical hospital emergencies within minutes. Every drop counts.
+          </p>
+
+          <div class="hero-cta-group">
+            <button class="btn btn-primary btn-lg" onclick="scrollToSection('find-donor')">
+              🔍 Find a Donor Now
+            </button>
+            <button class="btn btn-emergency btn-lg" onclick="scrollToSection('request-blood')">
+              🚨 Request Emergency Blood
+            </button>
+            <button class="btn btn-outline-primary btn-lg" onclick="scrollToSection('register')">
+              ❤️ Register as Donor
+            </button>
+          </div>
+
+          <!-- Quick Finder Toolbar inside Hero -->
+          <div class="hero-quick-search">
+            <div class="quick-search-header">
+              <h3>⚡ Quick Donor Search</h3>
+              <span class="tag-live">● Instant Match</span>
+            </div>
+            <form id="heroQuickSearchForm" class="quick-search-form">
+              <div class="quick-search-row">
+                <div class="form-group-compact">
+                  <label for="quickBloodGroup">Required Blood Group</label>
+                  <select id="quickBloodGroup" class="form-control-compact">
+                    <option value="ALL">All Blood Groups</option>
+                    <option value="O+">O+ (Positive)</option>
+                    <option value="O-">O- (Universal Donor)</option>
+                    <option value="A+">A+ (Positive)</option>
+                    <option value="A-">A- (Negative)</option>
+                    <option value="B+">B+ (Positive)</option>
+                    <option value="B-">B- (Negative)</option>
+                    <option value="AB+">AB+ (Universal Recipient)</option>
+                    <option value="AB-">AB- (Negative)</option>
+                  </select>
+                </div>
+
+                <div class="form-group-compact">
+                  <label for="quickCity">City / Location</label>
+                  <select id="quickCity" class="form-control-compact">
+                    <option value="ALL">All Cities</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Delhi">Delhi</option>
+                    <option value="Bengaluru">Bengaluru</option>
+                    <option value="Pune">Pune</option>
+                    <option value="Hyderabad">Hyderabad</option>
+                    <option value="Kolkata">Kolkata</option>
+                    <option value="Chennai">Chennai</option>
+                    <option value="Ahmedabad">Ahmedabad</option>
+                  </select>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">
+                Search Available Donors
+              </button>
+            </form>
+          </div>
+
+          <!-- Hero Metrics Strip -->
+          <div class="hero-stats-strip">
+            <div class="hero-stat-item">
+              <span class="hero-stat-value" id="heroTotalDonors">14</span>
+              <span class="hero-stat-label">Donors Registered</span>
+            </div>
+            <div class="hero-stat-item">
+              <span class="hero-stat-value" id="heroAvailDonors" style="color: var(--status-available);">10</span>
+              <span class="hero-stat-label">Available Now</span>
+            </div>
+            <div class="hero-stat-item">
+              <span class="hero-stat-value" id="heroActiveReqs" style="color: var(--primary);">4</span>
+              <span class="hero-stat-label">Active Emergencies</span>
+            </div>
+            <div class="hero-stat-item">
+              <span class="hero-stat-value" id="heroLivesSaved" style="color: #2563EB;">180+</span>
+              <span class="hero-stat-label">Lives Saved</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Visual Showcase -->
+        <div class="hero-visual">
+          <div class="hero-card-stack">
+            <!-- Floating Badge Top -->
+            <div class="hero-floating-badge floating-badge-1">
+              <div class="floating-icon green">✓</div>
+              <div class="floating-text">
+                <strong>Quick Response</strong>
+                <span>Avg match time: 14 mins</span>
+              </div>
+            </div>
+
+            <!-- Central Emergency Mockup Card -->
+            <div class="hero-main-card">
+              <div class="urgent-alert-pill">
+                <span style="display:inline-block; width:6px; height:6px; background:#DC2626; border-radius:50%; animation:heart-beat 1s infinite;"></span>
+                Active Hospital Emergency
+              </div>
+              <div class="hero-patient-info">
+                <div class="blood-drop-badge">
+                  <span>O-</span>
+                </div>
+                <div class="hero-patient-details">
+                  <h4>Rajesh K. Mehta (54y)</h4>
+                  <p>Lilavati Hospital, Mumbai</p>
+                </div>
+              </div>
+
+              <div class="hero-emergency-progress">
+                <div class="progress-labels">
+                  <span>Units Needed: <strong>2 Units</strong></span>
+                  <span style="color: #DC2626;">Critical Urgency</span>
+                </div>
+                <div class="progress-bar-wrap">
+                  <div class="progress-bar-fill" style="width: 65%;"></div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 8px; margin-top: 14px;">
+                <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="scrollToSection('find-donor')">
+                  View Matching Donors
+                </button>
+                <button class="btn btn-outline-primary btn-sm" onclick="scrollToSection('request-blood')">
+                  View Case
+                </button>
+              </div>
+            </div>
+
+            <!-- Floating Badge Bottom -->
+            <div class="hero-floating-badge floating-badge-2">
+              <div class="floating-icon blue">🩸</div>
+              <div class="floating-text">
+                <strong>100% Free Service</strong>
+                <span>Volunteer College Network</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Find a Donor -->
+    <section class="section-padding find-donor-section" id="find-donor">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Search Directory</span>
+          <h2>Find a Blood Donor</h2>
+          <p>Instantly filter registered donors by blood group, city, and live availability to secure life-saving blood when time is critical.</p>
+        </div>
+
+        <!-- Search & Filter Control Bar -->
+        <div class="search-filter-card">
+          <div class="filter-grid">
+            <div class="form-group">
+              <label for="filterSearch">Search by Name, Area or Keyword</label>
+              <div class="input-with-icon">
+                <span class="input-icon">🔍</span>
+                <input type="text" id="filterSearch" class="form-control" placeholder="e.g. Aarav, Andheri, O+, Kothrud...">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="filterCity">Filter by City</label>
+              <div class="input-with-icon">
+                <span class="input-icon">📍</span>
+                <select id="filterCity" class="form-control">
+                  <option value="ALL">All Cities</option>
+                  <option value="Mumbai">Mumbai</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Bengaluru">Bengaluru</option>
+                  <option value="Pune">Pune</option>
+                  <option value="Hyderabad">Hyderabad</option>
+                  <option value="Kolkata">Kolkata</option>
+                  <option value="Chennai">Chennai</option>
+                  <option value="Ahmedabad">Ahmedabad</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <button id="btnResetFilters" class="btn btn-outline-primary" style="width: 100%;">
+                Reset Filters
+              </button>
+            </div>
+          </div>
+
+          <!-- Blood Group Pills Row -->
+          <div class="blood-pills-row">
+            <span class="label">Blood Group:</span>
+            <button class="blood-pill-btn active" data-blood="ALL">All</button>
+            <button class="blood-pill-btn" data-blood="O+">O+</button>
+            <button class="blood-pill-btn" data-blood="O-">O-</button>
+            <button class="blood-pill-btn" data-blood="A+">A+</button>
+            <button class="blood-pill-btn" data-blood="A-">A-</button>
+            <button class="blood-pill-btn" data-blood="B+">B+</button>
+            <button class="blood-pill-btn" data-blood="B-">B-</button>
+            <button class="blood-pill-btn" data-blood="AB+">AB+</button>
+            <button class="blood-pill-btn" data-blood="AB-">AB-</button>
+          </div>
+
+          <!-- Filter Extras: Compatibility switch & Available Only -->
+          <div class="filter-extras">
+            <label class="toggle-switch-wrap">
+              <input type="checkbox" id="toggleCompatibility" style="display:none;">
+              <span class="toggle-switch"></span>
+              <span class="toggle-label">
+                Include Compatible Blood Donors 
+                <span class="compatibility-tip">Smart Match</span>
+              </span>
+            </label>
+
+            <label class="toggle-switch-wrap">
+              <input type="checkbox" id="toggleAvailableOnly" style="display:none;">
+              <span class="toggle-switch"></span>
+              <span class="toggle-label">Only Show "Available Now" Donors</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Filter Results Header -->
+        <div class="active-filters-info">
+          <h3>Matching Donors (<span class="counter" id="donorResultsCount">14</span>)</h3>
+          <div id="compatNotice" style="display: none; font-size: 0.88rem; color: var(--primary);"></div>
+        </div>
+
+        <!-- Donor Cards Grid -->
+        <div class="donor-cards-grid" id="donorCardsGrid">
+          <!-- Rendered dynamically by JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Emergency Blood Request Form -->
+    <section class="section-padding emergency-section" id="request-blood">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag" style="background:#FEF2F2; color:#DC2626;">Urgent Broadcast</span>
+          <h2>Emergency Blood Request</h2>
+          <p>Submit an immediate requirement for blood. Requests appear directly on the live dashboard and matching donors are notified instantly.</p>
+        </div>
+
+        <div class="emergency-wrapper">
+          <div class="emergency-banner-alert">
+            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 10h2v4h-2zm0 6h2v2h-2z"/>
+            </svg>
+            <div>
+              <h4>Critical Hospital Blood Dispatch</h4>
+              <p>Please provide authentic hospital details and a reliable contact number. This alert will be broadcasted across the local BloodConnect volunteer donor network.</p>
+            </div>
+          </div>
+
+          <form id="emergencyRequestForm">
+            <div class="form-grid-2">
+              <div class="form-field">
+                <label for="reqPatientName">Patient Full Name *</label>
+                <input type="text" id="reqPatientName" class="form-control" required placeholder="e.g. Suresh Kumar">
+              </div>
+
+              <div class="form-field">
+                <label for="reqBloodGroup">Blood Group Required *</label>
+                <select id="reqBloodGroup" class="form-control" required>
+                  <option value="" disabled selected>Select Blood Group</option>
+                  <option value="O+">O+ (Positive)</option>
+                  <option value="O-">O- (Universal Donor)</option>
+                  <option value="A+">A+ (Positive)</option>
+                  <option value="A-">A- (Negative)</option>
+                  <option value="B+">B+ (Positive)</option>
+                  <option value="B-">B- (Negative)</option>
+                  <option value="AB+">AB+ (Universal Recipient)</option>
+                  <option value="AB-">AB- (Negative)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-grid-3">
+              <div class="form-field">
+                <label for="reqUnits">Units Required *</label>
+                <input type="number" id="reqUnits" class="form-control" min="1" max="10" value="1" required>
+              </div>
+
+              <div class="form-field">
+                <label for="reqHospital">Hospital Name & Ward *</label>
+                <input type="text" id="reqHospital" class="form-control" required placeholder="e.g. City Care Hospital, ICU-3">
+              </div>
+
+              <div class="form-field">
+                <label for="reqCity">City / Location *</label>
+                <input type="text" id="reqCity" class="form-control" required placeholder="e.g. Mumbai, Pune, Delhi">
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-field">
+                <label for="reqArea">Area / Landmark</label>
+                <input type="text" id="reqArea" class="form-control" placeholder="e.g. Andheri West, Near Station">
+              </div>
+
+              <div class="form-field">
+                <label for="reqContactName">Contact Person Name & Relation *</label>
+                <input type="text" id="reqContactName" class="form-control" required placeholder="e.g. Ramesh (Brother) / Attending Doctor">
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="reqContactPhone">Direct Contact / Phone Number *</label>
+              <input type="tel" id="reqContactPhone" class="form-control" required placeholder="e.g. +91 98765 43210">
+            </div>
+
+            <!-- Urgency Level Selection -->
+            <div class="form-field">
+              <label>Urgency Level *</label>
+              <div class="urgency-options">
+                <label class="urgency-card critical selected">
+                  <input type="radio" name="reqUrgency" value="Critical (< 2 hrs)" checked>
+                  <div class="urgency-icon">🔴</div>
+                  <strong>Critical (< 2 hrs)</strong>
+                  <span>Surgery / Trauma</span>
+                </label>
+
+                <label class="urgency-card urgent">
+                  <input type="radio" name="reqUrgency" value="Urgent (< 12 hrs)">
+                  <div class="urgency-icon">🟠</div>
+                  <strong>Urgent (< 12 hrs)</strong>
+                  <span>Today / Night</span>
+                </label>
+
+                <label class="urgency-card standard">
+                  <input type="radio" name="reqUrgency" value="Standard (< 48 hrs)">
+                  <div class="urgency-icon">🔵</div>
+                  <strong>Standard (< 48 hrs)</strong>
+                  <span>Planned Transfusion</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="reqNotes">Additional Clinical Notes or Doctor's Message</label>
+              <textarea id="reqNotes" class="form-control" rows="2" placeholder="e.g. Replacement blood required for emergency bypass. Platelet count critical."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-emergency btn-lg" style="width: 100%;">
+              🚨 Broadcast Emergency Blood Request
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Donor Registration Form -->
+    <section class="section-padding register-section" id="register">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Join as a Lifesaver</span>
+          <h2>Register as a Blood Donor</h2>
+          <p>Your single blood donation can save up to three lives. Fill the details below to join the verified BloodConnect volunteer network.</p>
+        </div>
+
+        <div class="register-layout">
+          <!-- Left Info Panel -->
+          <div class="register-info-panel">
+            <h3>Why Register?</h3>
+            <p>Become part of a compassionate community that answers distress calls from local hospitals and families.</p>
+
+            <ul class="benefit-list">
+              <li class="benefit-item">
+                <div class="benefit-icon">🩸</div>
+                <div>
+                  <h5>Save 3 Lives Per Donation</h5>
+                  <p>Red blood cells, platelets, and plasma help cancer, trauma, and surgical patients.</p>
+                </div>
+              </li>
+              <li class="benefit-item">
+                <div class="benefit-icon">🔒</div>
+                <div>
+                  <h5>Privacy & Control</h5>
+                  <p>You can toggle your availability anytime and accept requests only when free.</p>
+                </div>
+              </li>
+              <li class="benefit-item">
+                <div class="benefit-icon">🪪</div>
+                <div>
+                  <h5>Digital Donor ID Card</h5>
+                  <p>Instantly receive your official BloodConnect digital badge upon registration.</p>
+                </div>
+              </li>
+            </ul>
+
+            <div class="digital-card-preview-teaser">
+              <p>✨ Complete the form to generate your personal <strong>Digital Blood Donor Card</strong>!</p>
+            </div>
+          </div>
+
+          <!-- Right Registration Form -->
+          <div class="register-form-card">
+            <form id="donorRegisterForm">
+              <div class="form-grid-2">
+                <div class="form-field">
+                  <label for="regFullName">Full Name *</label>
+                  <input type="text" id="regFullName" class="form-control" required placeholder="e.g. Priya Sharma">
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-field">
+                    <label for="regAge">Age (18-65) *</label>
+                    <input type="number" id="regAge" class="form-control" min="18" max="65" required placeholder="24">
+                  </div>
+                  <div class="form-field">
+                    <label for="regGender">Gender</label>
+                    <select id="regGender" class="form-control">
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Blood Group Selector Tiles -->
+              <div class="form-field">
+                <label>Select Blood Group *</label>
+                <div class="blood-group-selector">
+                  <label class="blood-tile selected">
+                    <input type="radio" name="regBloodGroup" value="O+" checked>
+                    <strong>O+</strong>
+                  </label>
+                  <label class="blood-tile">
+                    <input type="radio" name="regBloodGroup" value="O-">
+                    <strong>O-</strong>
+                  </label>
+                  <label class="blood-tile">
+                    <input type="radio" name="regBloodGroup" value="A+">
+                    <strong>A+</strong>
+                  </label>
+                  <label class="blood-tile">
+                    <input type="radio" name="regBloodGroup" value="A-">
+                    <strong>A-</strong>
+                  </label>
+                  <label class="blood-tile">
+                    <input type="radio" name="regBloodGroup" value="B+">
+                    <strong>B+</strong>
+                  </label>
+                  <label class="blood-tile">
+                    <input type="radio" name="regBloodGroup" value="B-">
+                    <strong>B-</strong>
+                  </label>
+                  <label class="blood-tile">
+                    <input type="radio" name="regBloodGroup" value="AB+">
+                    <strong>AB+</strong>
+                  </label>
+                  <label class="blood-tile">
+                    <input type="radio" name="regBloodGroup" value="AB-">
+                    <strong>AB-</strong>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-field">
+                  <label for="regPhone">Mobile Phone Number *</label>
+                  <input type="tel" id="regPhone" class="form-control" required placeholder="e.g. +91 98765 12345">
+                </div>
+
+                <div class="form-field">
+                  <label for="regAvailability">Current Availability *</label>
+                  <select id="regAvailability" class="form-control" required>
+                    <option value="Available Now">Available Now (Ready to donate)</option>
+                    <option value="On Call">On Call (Evenings / Weekends)</option>
+                    <option value="Busy / Away">Temporarily Unavailable</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-field">
+                  <label for="regCity">City *</label>
+                  <input type="text" id="regCity" class="form-control" required placeholder="e.g. Mumbai, Bengaluru, Pune">
+                </div>
+
+                <div class="form-field">
+                  <label for="regArea">Area / Neighborhood</label>
+                  <input type="text" id="regArea" class="form-control" placeholder="e.g. Andheri, Indiranagar, Rohini">
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label for="regLastDonation">Last Blood Donation Date (if applicable)</label>
+                <input type="date" id="regLastDonation" class="form-control">
+                <small style="color: var(--text-muted); font-size: 0.78rem;">Leave blank if this will be your first time donating blood.</small>
+              </div>
+
+              <div class="form-field">
+                <label class="checkbox-field">
+                  <input type="checkbox" id="regWeightCheck" required>
+                  <span>I confirm that I am in good health, weigh at least 50 kg, and have had no major surgery, tattoos, or infections in the last 6 months.</span>
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 10px;">
+                Complete Donor Registration & Get ID Card
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Blood Group Compatibility Guide -->
+    <section class="section-padding compatibility-section" id="compatibility">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Medical Science</span>
+          <h2>Blood Group Compatibility Guide</h2>
+          <p>Understand which blood groups can safely donate to or receive from one another. Crucial for patient safety and emergency matching.</p>
+        </div>
+
+        <!-- Interactive Explorer Tool -->
+        <div class="compatibility-hero-tool">
+          <h3 class="compat-selector-title">Select Any Blood Group to Explore:</h3>
+          <div class="compat-buttons-grid" id="compatButtonGroup">
+            <!-- Rendered by JS -->
+          </div>
+
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h3 id="compatSelectedTitle" style="color: var(--primary); font-size: 1.6rem; margin-bottom: 6px;">O- (Universal Red Cell Donor)</h3>
+            <p id="compatDescription" style="color: var(--text-secondary); max-width: 640px; margin: 0 auto;">
+              O- can only receive O- blood, but can be given to patients of ANY blood group in emergencies!
+            </p>
+          </div>
+
+          <div class="compat-results-grid">
+            <div class="compat-result-card receive">
+              <h4>
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                Can Receive Blood From:
+              </h4>
+              <p class="sub">These donors can safely give red blood cells to this recipient:</p>
+              <div class="compat-pills-list" id="compatReceiveList">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+
+            <div class="compat-result-card donate">
+              <h4>
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M5 15h4v6h6v-6h4l-7-7-7 7zM5 4v2h14V4H5z"/></svg>
+                Can Donate Blood To:
+              </h4>
+              <p class="sub">This donor can safely give red blood cells to these recipients:</p>
+              <div class="compat-pills-list" id="compatDonateList">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Full 8x8 Compatibility Matrix Table -->
+        <div class="matrix-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="font-size: 1.3rem;">Full Blood Type Transfusion Matrix</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Red Blood Cell (RBC) compatibility reference</p>
+            </div>
+            <div style="display: flex; gap: 14px; font-size: 0.85rem; font-weight: 600;">
+              <span style="color: #059669;">● Compatible (✓)</span>
+              <span style="color: #94A3B8;">● Incompatible (✕)</span>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="compat-table">
+              <thead>
+                <tr>
+                  <th rowspan="2" style="background:#FFF;">Recipient Blood Group ↓</th>
+                  <th colspan="8">Donor Blood Group (Safe to Give) →</th>
+                </tr>
+                <tr>
+                  <th>O-</th>
+                  <th>O+</th>
+                  <th>A-</th>
+                  <th>A+</th>
+                  <th>B-</th>
+                  <th>B+</th>
+                  <th>AB-</th>
+                  <th>AB+</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="recipient-label">O-</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                </tr>
+                <tr>
+                  <td class="recipient-label">O+</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                </tr>
+                <tr>
+                  <td class="recipient-label">A-</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                </tr>
+                <tr>
+                  <td class="recipient-label">A+</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                </tr>
+                <tr>
+                  <td class="recipient-label">B-</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                </tr>
+                <tr>
+                  <td class="recipient-label">B+</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-no">✕</td>
+                </tr>
+                <tr>
+                  <td class="recipient-label">AB-</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-no">✕</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-no">✕</td>
+                </tr>
+                <tr>
+                  <td class="recipient-label">AB+</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-yes">✓</td>
+                  <td class="match-yes">✓</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Universal Donor & Recipient Callout Cards -->
+        <div class="universal-cards-grid">
+          <div class="callout-card">
+            <div class="callout-icon red">O-</div>
+            <div class="callout-info">
+              <h4>Universal Red Blood Cell Donor</h4>
+              <p>Type <strong>O-Negative</strong> blood has neither A, B, nor Rh antigens on the red blood cells, making it safe for anyone of any blood group during trauma surgeries when there is no time to test.</p>
+            </div>
+          </div>
+
+          <div class="callout-card">
+            <div class="callout-icon blue">AB+</div>
+            <div class="callout-info">
+              <h4>Universal Red Blood Cell Recipient</h4>
+              <p>Type <strong>AB-Positive</strong> individuals have both A and B antigens plus the Rh factor. Therefore, their immune systems will not attack donor red blood cells from any blood group!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Live Dashboard -->
+    <section class="section-padding dashboard-section" id="dashboard">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Operations Overview</span>
+          <h2>Live System Dashboard</h2>
+          <p>Real-time analytics, active emergency queues, and blood inventory breakdown across our volunteer network.</p>
+        </div>
+
+        <!-- Dashboard Top Status Bar -->
+        <div class="dashboard-controls">
+          <div class="live-indicator">
+            <span class="live-dot"></span>
+            <span>Live Volunteer Operations Active</span>
+          </div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn btn-outline-primary btn-sm" onclick="addQuickDemoRequest()">
+              ⚡ Spawn Demo Request
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="resetDemoData()">
+              🔄 Reset Demo Dataset
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Metric Cards -->
+        <div class="dashboard-stats-grid">
+          <div class="dash-stat-card">
+            <div class="dash-stat-icon red">🩸</div>
+            <div class="dash-stat-info">
+              <h3 id="dashTotalDonors">14</h3>
+              <p>Total Registered Donors</p>
+            </div>
+          </div>
+
+          <div class="dash-stat-card">
+            <div class="dash-stat-icon green">✅</div>
+            <div class="dash-stat-info">
+              <h3 id="dashAvailDonors" style="color: var(--status-available);">10</h3>
+              <p>Donors Available Right Now</p>
+            </div>
+          </div>
+
+          <div class="dash-stat-card">
+            <div class="dash-stat-icon amber">🚨</div>
+            <div class="dash-stat-info">
+              <h3 id="dashActiveReqs" style="color: var(--primary);">4</h3>
+              <p>Active Blood Requests</p>
+            </div>
+          </div>
+
+          <div class="dash-stat-card">
+            <div class="dash-stat-icon purple">🏥</div>
+            <div class="dash-stat-info">
+              <h3>8</h3>
+              <p>Blood Groups Covered</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 Column Layout: Blood Stock & Emergency Feed -->
+        <div class="dashboard-layout-2col">
+          <!-- Blood Groups Inventory Breakdown -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h3>
+                <span>🩸</span> Blood Groups Availability
+              </h3>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Click any to filter</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px;">
+              Distribution of volunteer donors across all 8 major blood groups. Click on a group to view matching donors immediately:
+            </p>
+            <div class="blood-groups-grid" id="bloodStockGrid">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Active Emergency Requests Live Feed -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h3>
+                <span>🚨</span> Live Emergency Blood Requests
+              </h3>
+              <span class="tag-live" style="background:#FEE2E2; color:#DC2626; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:10px;">
+                Priority Broadcast
+              </span>
+            </div>
+            <div class="requests-feed" id="emergencyRequestsFeed">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modals -->
+
+  <!-- 1. Contact / Call Donor Modal -->
+  <div class="modal-overlay" id="contactModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Contact Volunteer Donor</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" id="contactModalBody">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" onclick="closeAllModals()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Digital Donor ID Card Modal -->
+  <div class="modal-overlay" id="donorCardModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>🎉 Digital Donor ID Card</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" id="donorCardBody">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-primary btn-sm" onclick="window.print()">🖨️ Print / Save PDF</button>
+        <button class="btn btn-primary btn-sm" onclick="closeAllModals()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand" style="color: #FFF; margin-bottom: 12px;">
+            <div class="brand-icon" style="width:36px; height:36px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+              </svg>
+            </div>
+            <span>Blood<span style="color:#F87171;">Connect</span></span>
+          </div>
+          <p>
+            An innovative, rapid-response blood donation platform designed to connect volunteer donors with patients in urgent need. College Hackathon Prototype.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Quick Navigation</h4>
+          <ul class="footer-links">
+            <li><a href="#home" onclick="scrollToSection('home'); return false;">Home</a></li>
+            <li><a href="#find-donor" onclick="scrollToSection('find-donor'); return false;">Find a Donor</a></li>
+            <li><a href="#register" onclick="scrollToSection('register'); return false;">Donor Registration</a></li>
+            <li><a href="#request-blood" onclick="scrollToSection('request-blood'); return false;">Emergency Request</a></li>
+            <li><a href="#compatibility" onclick="scrollToSection('compatibility'); return false;">Compatibility Chart</a></li>
+            <li><a href="#dashboard" onclick="scrollToSection('dashboard'); return false;">Live Dashboard</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Blood Types</h4>
+          <ul class="footer-links">
+            <li><a href="javascript:void(0)" onclick="selectCompatGroup('O-'); scrollToSection('compatibility');">O- Negative (Universal)</a></li>
+            <li><a href="javascript:void(0)" onclick="selectCompatGroup('O+'); scrollToSection('compatibility');">O+ Positive</a></li>
+            <li><a href="javascript:void(0)" onclick="selectCompatGroup('A+'); scrollToSection('compatibility');">A+ Positive</a></li>
+            <li><a href="javascript:void(0)" onclick="selectCompatGroup('B+'); scrollToSection('compatibility');">B+ Positive</a></li>
+            <li><a href="javascript:void(0)" onclick="selectCompatGroup('AB+'); scrollToSection('compatibility');">AB+ Universal Recipient</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-emergency-box">
+            <h5>24/7 National Blood Helpline</h5>
+            <p>In life-threatening situations, also reach out to official government emergency services immediately:</p>
+            <a href="tel:108" class="emergency-phone-link">Dial 108 / 104</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 BloodConnect – College Hackathon Prototype. Powered by HTML5, CSS3, and JavaScript. All demo data clearly simulated for evaluation.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
